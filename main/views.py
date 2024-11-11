@@ -3,12 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from main.models import Project
 
-
-# def home(request):
-#     return render(request, 'home.html')
-
 def login_view(request):
-    hardcoded_password = "1234"  # Replace with your desired password
+    hardcoded_password = "1234"
 
     if request.method == "POST":
         password = request.POST.get("password")
@@ -26,15 +22,8 @@ def home(request):
     # Render your home page here
     return render(request, 'home.html')
 
-
-
-def projects(request):
-    return render(request, 'projects.html')
-
-def project_detail(request, pk):
-    project = get_object_or_404(Project, pk=pk)
-    return render(request, 'project_detail.html', {'project': project})
-
+def project_control_center(request):
+    return render(request, 'project_control_center.html')
 
 def about(request):
     return render(request, 'about.html')
