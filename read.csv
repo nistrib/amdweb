@@ -1,0 +1,83 @@
+#include <WiFiClientSecure.h>
+#include <ESP8266WiFi.h>  // For ESP8266 boards; use ESP32WiFi for ESP32
+
+const char* ssid = "your_wifi_ssid";
+const char* password = "your_wifi_password";
+const char* host = "your-django-server.com";  // Replace with your server's domain or IP
+const int httpsPort = 443;  // Default HTTPS port
+
+WiFiClientSecure client;
+
+void setup() {
+    Serial.begin(115200);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+    client.setInsecure();  // Disable SSL verification for development
+    Serial.println("Connected to WiFi");
+}
+
+void loop() {
+    if (!client.connect(host, httpsPort)) {
+        Serial.println("Connection to server failed");
+        delay(5000);
+        return;
+    }
+
+    // Send GET request to get_status endpoint
+    client.print(String("GET ") + "/project_control_center/get_status/" + " HTTP/1.1\r\n" +
+                 "Host: " + host + "\r\n" +
+                 "Connection: close\r\n\r\n");
+
+    // Wait for response
+    while (client.connected() || client.available()) {
+        if (client.available()) {
+            String line = client.readStringUntil('\n');
+            if (line.startsWith("{")) {  // Assuming response is JSON {"status": "ON"}
+                if (line.indexOf("\"ON\"") > 0) {
+                    // Turn ON Arduino device (replace with actual control code)
+                    Serial.println("Turning ON device");
+                } else if (line.indexOf("\"OFF\"") > 0) {
+                    // Turn OFF Arduino device (replace with actual control code)
+                    Serial.println("Turning OFF device");
+                }
+            }
+        }
+    }
+
+    client.stop();
+    delay(5000);  // Check every 5 seconds
+}
+
+
+
+
+
+
+
+My original idea for the connection was to use the Django server as an intermediary between the HTML interface and the Arduino. Here’s how it would work:
+
+HTML Interface to Django Server:
+When you press the "ON" or "OFF" button in the HTML interface (on the Project Control Center page), it sends an AJAX request to the Django server.
+The Django server receives this request and updates a variable or a database entry to store the current state (ON or OFF).
+Arduino Polling the Django Server:
+The Arduino, acting as an HTTP client, periodically makes HTTPS requests to the Django server to check the current state.
+It requests a specific endpoint (e.g., /project_control_center/get_status/) where the Django server responds with the latest status (ON or OFF) in JSON format.
+Based on this response, the Arduino then turns itself ON or OFF accordingly.
+Why This Approach Works Well
+Security: All communication is handled over HTTPS with the Django server, which is easier to secure than direct communication between the HTML page and the Arduino.
+Simplified Communication: The Arduino only needs to periodically check one endpoint to know its status, reducing the need for complex real-time interactions.
+Avoids CORS Issues: The HTML page does not need to connect directly to the Arduino, which avoids browser security restrictions.
+Data Flow
+User presses ON/OFF button in the HTML interface.
+AJAX request goes from HTML to Django, updating the state.
+Django server updates the state (e.g., in a variable or database).
+Arduino polls Django server periodically to get the current state.
+Arduino reacts based on the state (turns ON/OFF).
+Summary of Steps for Setup
+Django Views and Endpoints: Create views in Django for updating the state based on button presses and another view for the Arduino to retrieve the current state.
+HTML AJAX Calls: Use AJAX in the HTML interface to send requests to Django for ON/OFF actions.
+Arduino HTTP Client Code: Configure the Arduino to make HTTPS requests to the Django server’s /get_status/ endpoint every few seconds to get the latest state.
+This setup keeps the system organized and avoids the need for direct connections between the HTML and the Arduino. Let me know if you’d like further guidance on any of these steps!

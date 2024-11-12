@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
@@ -26,5 +26,26 @@ def home(request):
 def project_control_center(request):
     return render(request, 'project_control_center.html')
 
+
 def about(request):
     return render(request, 'about.html')
+
+
+# Arduino Code for Button Turn ON, OFF
+arduino_status = {"status": "OFF"}
+
+
+def update_status(request):
+    # Update status based on button press
+    global arduino_status
+    command = request.GET.get('command')
+    if command in ["ON", "OFF"]:
+        arduino_status["status"] = command
+    return JsonResponse({"status": arduino_status["status"]})
+
+def get_status(request):
+    # Return the current status to the Arduino
+    return JsonResponse(arduino_status)
+
+
+

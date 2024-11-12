@@ -2,33 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Control Center</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Project Control Center</h1>
-        <nav>
-            <a href="{% url 'home' %}">Home</a> |
-            <a href="{% url 'project_control_center' %}">Project Control Center</a> |
-            <a href="{% url 'about' %}">About</a>
-        </nav>
-    </header>
-    <section>
-        <p>Use the buttons below to control the Smart Pill Box via Arduino:</p>
-        <button onclick="controlDevice('on')">ON</button>
-        <button onclick="controlDevice('off')">OFF</button>
-    </section>
+    <h1>Project Control Center</h1>
+    <p>Control the Arduino-powered Smart Pill Box remotely.</p>
+    
+    <button id="on-button">ON</button>
+    <button id="off-button">OFF</button>
+
+    <nav>
+        <a href="{% url 'home' %}">Home</a> |
+        <a href="{% url 'project_control_center' %}">Project Control Center</a> |
+        <a href="{% url 'about' %}">About</a>
+    </nav>
+
     <script>
-        function controlDevice(state) {
-            fetch(`https://your-arduino-url/${state}`, {
-                method: 'GET',
-                mode: 'cors'
-            })
-            .then(response => response.json())
-            .then(data => alert(`Device turned ${state.toUpperCase()}`))
-            .catch(error => console.error('Error:', error));
-        }
+        // AJAX for ON button
+        $('#on-button').click(function() {
+            $.ajax({
+                url: '{% url "turn_on" %}?command=ON',
+                type: 'GET',
+                success: function(response) {
+                    alert('Arduino turned ON!');
+                },
+                error: function(error) {
+                    alert('Failed to turn ON the Arduino');
+                }
+            });
+        });
+
+        // AJAX for OFF button
+        $('#off-button').click(function() {
+            $.ajax({
+                url: '{% url "turn_off" %}?command=OFF',
+                type: 'GET',
+                success: function(response) {
+                    alert('Arduino turned OFF!');
+                },
+                error: function(error) {
+                    alert('Failed to turn OFF the Arduino');
+                }
+            });
+        });
     </script>
 </body>
 </html>
