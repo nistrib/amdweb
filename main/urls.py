@@ -17,6 +17,7 @@ from . import views
 urlpatterns = [
     path('', views.login_view, name='login'),  # Set the login view as the default route
     path('home/', views.home, name='home'),  # Make home accessible after login
+
     path('project_control_center/', views.project_control_center, name='project_control_center'),
     path('about/', views.about, name='about'),
 
